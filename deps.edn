@@ -1,0 +1,21 @@
+{:paths ["src"]
+ :jvm-opts ["-Djdk.attach.allowAttachSelf"]
+ :deps {org.clojure/clojure        {:mvn/version "1.11.1"}
+        cheshire/cheshire          {:mvn/version "5.10.2"}
+        clj-commons/clj-yaml       {:mvn/version "1.0.26"}}
+
+ :aliases
+ {:nrepl
+  {:extra-paths ["test"]
+   :extra-deps  {cider/cider-nrepl {:mvn/version "LATEST"}}
+
+   :main-opts   ["-m" "nrepl.cmdline"
+                 "-b" "0.0.0.0"
+                 "--middleware"
+                 "[cider.nrepl/cider-middleware]"]}
+
+  :kaocha
+  {:extra-deps {lambdaisland/kaocha {:mvn/version "1.77.1236"}}
+   :extra-paths ["test"]
+   :jvm-opts   ^:replace ["-XX:-OmitStackTraceInFastThrow"]
+   :main-opts  ["-m" "kaocha.runner"]}}}
