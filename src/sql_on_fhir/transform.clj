@@ -4,11 +4,12 @@
 (declare transform)
 (defn process-extensions [ctx exts]
   (->> exts
-       (reduce (fn [acc {url :url nested :extension :as ext}]
+       (map-indexed (fn [i e] [i e]))
+       (reduce (fn [acc [i {url "url" nested "extension" :as ext}]]
                  (if url
-                   (let [k (keyword (str/replace (last (str/split url #"/")) #"[^_a-zA-Z0-9]+" "_"))]
+                   (let [k (str/replace (last (str/split url #"/")) #"[^_a-zA-Z0-9]+" "_")]
                      (update acc k (fn [x]
-                                     (conj (or x []) (transform ctx ext)))))
+                                     (conj (or x []) (assoc (transform ctx ext) "sof_index" i)))))
                    acc))
                {})))
 
@@ -23,31 +24,27 @@
     (->> obj
          (reduce (fn [acc [k v]]
                    (cond
-                     (and (= k :reference) (string? v))
+                     (and (= k "reference") (string? v))
                      (let [[type id] (parse-ref v)]
-                       (assoc acc k v :sof_id id :type type))
+                       (assoc acc k v "sof_id" id "type" type))
 
-                     (and (= k :coding) (sequential? v))
-                     (assoc acc k (transform ctx v) :sof_codes (->> v (mapv (fn [{s :system c :code}] (str s "|" c)))))
-
-                     (and (= k :component) (sequential? v))
-                     (assoc acc k (transform ctx v)
-                            :sof_component (group-by (fn [x] (get-in x [:code :coding 0 :code])) v))
+                     (and (= k "coding") (sequential? v))
+                     (assoc acc k (transform ctx v) "sof_codes" (->> v (mapv (fn [{s "system" c "code"}] (str s "|" c)))))
 
                      :else
                      (cond->
                          (if (or (map? v) (vector? v))
                            (let [v' (transform ctx v)]
-                             (if (and (sequential? v') (seq (mapcat :sof_codes v')))
-                               (let [codes (->> (mapcat :sof_codes v')
+                             (if (and (sequential? v') (seq (mapcat "sof_codes" v')))
+                               (let [codes (->> (mapcat #(get % "sof_codes") v')
                                                 (into #{})
                                                 (into []))]
                                  (assoc acc (keyword (str "sof_" (name k) "_codes")) codes k v'))
                                (assoc acc k v')))
                            (assoc acc k v))
-                       (= k :extension)
-                       (-> (dissoc :extension)
-                           (assoc :sof_extension (process-extensions ctx v))))))
+                       (= k "extension")
+                       (-> (dissoc "extension")
+                           (assoc "sof_extension" (process-extensions ctx v))))))
                  {}))
 
     (sequential? obj)

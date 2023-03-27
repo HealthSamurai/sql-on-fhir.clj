@@ -5,3 +5,16 @@ references:
   output:
     resourceType: Encounter
     subject: {reference: 'Patient/pt-1', sof_id: 'pt-1', type: 'Patient'}
+extensions:
+  input:
+    resourceType: Patient
+    extension:
+      - url: 'http://fhir.org/us-core/us-core-race'
+        valueCoding: {code: 'white', system: 'sys'}
+  output:
+    resourceType: Patient
+    sof_extension:
+      us_core_race:
+        - valueCoding: {code: 'white', system: 'sys'}
+          url: 'http://fhir.org/us-core/us-core-race'
+          sof_index: 0
