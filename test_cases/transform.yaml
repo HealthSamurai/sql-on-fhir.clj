@@ -1,0 +1,7 @@
+references:
+  input:
+    resourceType: Encounter
+    subject: {reference: 'Patient/pt-1'}
+  output:
+    resourceType: Encounter
+    subject: {reference: 'Patient/pt-1', sof_id: 'pt-1', type: 'Patient'}
