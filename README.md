@@ -5,8 +5,8 @@ Reference implementation of SQL on FHIR in clojure
 
 ## Getting started
 
-Install clojure - https://clojure.org/guides/install_clojure
-Install synthea - https://synthea.mitre.org/ or download pre-generated data
+* Install clojure - https://clojure.org/guides/install_clojure
+* Install synthea - https://synthea.mitre.org/ or download pre-generated data
 
 ```bash
 
