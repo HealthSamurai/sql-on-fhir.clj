@@ -73,16 +73,39 @@
         gz (GZIPOutputStream. bs)]
     (BufferedWriter. (OutputStreamWriter. gz StandardCharsets/UTF_8))))
 
+
 (defn translate-ndjson [input-file output-file]
-  (with-open [w (if (str/ends-with? input-file ".gz")
-                  (gzip-writer output-file)
-                  (io/writer output-file))]
-    (with-open [rdr (if (str/ends-with? output-file ".gz")
-                      (gzip-reader input-file)
-                      (clojure.java.io/reader (io/file input-file)))]
-      (doseq [line (line-seq rdr)]
-        (.write w (cheshire.core/generate-string (transform {} (cheshire.core/parse-string line keyword))))
-        (.write w "\n")))))
+  (let [num (volatile! 0)]
+    (println :> input-file output-file "(print '.' every 10000)")
+    (time
+     (with-open [w (if (str/ends-with? input-file ".gz")
+                     (gzip-writer output-file)
+                     (io/writer output-file))]
+       (with-open [rdr (if (str/ends-with? output-file ".gz")
+                         (gzip-reader input-file)
+                         (clojure.java.io/reader (io/file input-file)))]
+         (doseq [line (line-seq rdr)]
+           (vswap! num inc)
+           (when (= 0 (mod @num 10000))
+             (print ".")
+             (flush))
+           (.write w (cheshire.core/generate-string (transform {} (cheshire.core/parse-string line keyword))))
+           (.write w "\n"))
+         (println ))))))
+
+
+(defn translate-ndjson-directory [input-dir output-dir]
+  (let [output-dir (io/file output-dir)]
+    (when (.exists output-dir)
+      (throw (Exception. (str output-dir " already exists"))))
+    (.mkdir output-dir)
+    (time
+     (->> (.listFiles (io/file input-dir))
+          (mapv (fn [file]
+                  (when (or (str/ends-with? (.getName file) ".ndjson")
+                            (str/ends-with? (.getName file) ".ndjson.gz"))
+                    (let [output-file (io/file output-dir (.getName file))]
+                      (translate-ndjson (.getPath file) (.getPath output-file))))))))))
 
 (defn read-ndjson [file]
   (with-open [rdr (if (str/ends-with? file ".gz")
@@ -91,17 +114,8 @@
     (->> (line-seq rdr)
          (mapv (fn [x] (cheshire.core/parse-string x keyword))))))
 
-(defn translate-ndjson-directory [input-dir output-dir]
-  (let [output-dir (io/file output-dir)]
-    (when (.exists output-dir)
-      (throw (Exception. (str output-dir " already exists"))))
-    (.mkdir output-dir)
-    (->> (.listFiles (io/file input-dir))
-         (mapv (fn [file]
-                 (when (str/ends-with? (.getName file) ".ndjson")
-                   (let [output-file (io/file output-dir (.getName file))]
-                     (println :create output-file)
-                     (time (translate-ndjson file output-file)))))))))
+(defn args [& args]
+  (println :args args))
 
 (comment
   (translate-ndjson "fhir/Patient.ndjson.gz" "/tmp/pt.ndjson.gz")
