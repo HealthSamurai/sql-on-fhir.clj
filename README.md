@@ -2,6 +2,12 @@
 
 Reference implementation of SQL on FHIR in clojure
 
+## Transformation
+
+* reference transformation
+* extensions transformation
+* codes materialization
+
 
 ## Getting started
 
