@@ -38,10 +38,11 @@ Play with duckdb
 
 cd <DATADIR>/sof/
 
-duckdb
+duckdb fhir.duckdb
 
 D select * from read_json_auto('Patient.ndjson.gz') limit 10;
 D CREATE TABLE patient AS select * from read_json_auto('Patient.ndjson.gz');
+D PRAGMA show('patient');
 D select gender, sof_extension.us_core_race[1].sof_extension.text[1].valueString, count(*) from patient group by 1,2 limit 10;
 
 # generate parquet
