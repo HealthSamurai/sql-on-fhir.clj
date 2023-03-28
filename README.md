@@ -10,18 +10,16 @@ Reference implementation of SQL on FHIR in clojure
 
 ```bash
 
+cd ~/synthea && ./run_synthea --exporter.baseDirectory="<DATADIR>" --exporter.fhir.bulk_data=true -p 100
+
 git clone git@github.com:HealthSamurai/sql-on-fhir.clj.git
 
 cd sql-on-fhir.clj
 
-cd ~/synthea && ./run_synthea --exporter.baseDirectory="<DATADIR>" --exporter.fhir.bulk_data=true -p 100
-
 # run transformation of ndjson file
-
 clj -M -m sql-on-fhir.core tx <DATADIR>/fhir/Patient.ndjson.gz <DATADIR>/sof/Patient.ndjson.gz
 
 # transform folder of ndjson files
-
 clj -M -m sql-on-fhir.core tx <DATADIR>/fhir/ <DATADIR>/sof
 
 
