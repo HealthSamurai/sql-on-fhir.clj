@@ -11,10 +11,21 @@ extensions:
     extension:
       - url: 'http://fhir.org/us-core/us-core-race'
         valueCoding: {code: 'white', system: 'sys'}
+      - url: 'http://fancy.com/postfix'
+        valueString: 'string'
+      - url: 'http://fhir.org/us-core/us-core-race'
+        valueCoding: {code: 'green', system: 'sys'}
   output:
     resourceType: Patient
     sof_extension:
+      postfix:
+        - valueString: 'string'
+          url: 'http://fhir.org/us-core/us-core-race'
+          sof_index: 1
       us_core_race:
         - valueCoding: {code: 'white', system: 'sys'}
           url: 'http://fhir.org/us-core/us-core-race'
           sof_index: 0
+        - valueCoding: {code: 'green', system: 'sys'}
+          url: 'http://fhir.org/us-core/us-core-race'
+          sof_index: 2
